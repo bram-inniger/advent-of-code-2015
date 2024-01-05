@@ -1,6 +1,31 @@
+use itertools::Itertools;
 use rustc_hash::FxHashSet;
 
 pub fn solve_1(directions: &str) -> usize {
+    houses(directions).len()
+}
+
+pub fn solve_2(directions: &str) -> usize {
+    let santa: String = directions
+        .chars()
+        .enumerate()
+        .filter(|(idx, _)| idx % 2 == 0)
+        .map(|(_, d)| d)
+        .collect();
+    let robot_santa: String = directions
+        .chars()
+        .enumerate()
+        .filter(|(idx, _)| idx % 2 != 0)
+        .map(|(_, d)| d)
+        .collect();
+
+    houses(&santa)
+        .union(&houses(&robot_santa))
+        .collect_vec()
+        .len()
+}
+
+fn houses(directions: &str) -> FxHashSet<Coordinate> {
     let mut visited: FxHashSet<Coordinate> = FxHashSet::default();
     let mut current = Coordinate { x: 0, y: 0 };
 
@@ -18,7 +43,7 @@ pub fn solve_1(directions: &str) -> usize {
         visited.insert(current);
     }
 
-    visited.len()
+    visited
 }
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
@@ -43,5 +68,19 @@ mod tests {
         let input = include_str!("../../inputs/day_03.txt").trim();
 
         assert_eq!(2_592, solve_1(input));
+    }
+
+    #[test]
+    fn day_03_part_02_sample() {
+        assert_eq!(3, solve_2("^v"));
+        assert_eq!(3, solve_2("^>v<"));
+        assert_eq!(11, solve_2("^v^v^v^v^v"));
+    }
+
+    #[test]
+    fn day_03_part_02_solution() {
+        let input = include_str!("../../inputs/day_03.txt").trim();
+
+        assert_eq!(2_360, solve_2(input));
     }
 }
