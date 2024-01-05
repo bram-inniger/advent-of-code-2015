@@ -1,41 +1,35 @@
-// use std::str::FromStr;
-
-// use regex::Regex;
-
-pub fn solve_1(X: &[&str]) -> u32 {
-    42
+pub fn solve_1(instructions: &str) -> i16 {
+    instructions
+        .chars()
+        .map(|c| match c {
+            '(' => 1,
+            ')' => -1,
+            _ => unreachable!(),
+        })
+        .sum()
 }
 
 #[cfg(test)]
 mod tests {
-    use itertools::Itertools;
-
     use super::*;
 
     #[test]
     fn day_01_part_01_sample() {
-        let sample = vec![
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-        ];
-
-        assert_eq!(42, solve_1(&sample));
+        assert_eq!(0, solve_1("(())"));
+        assert_eq!(0, solve_1("()()"));
+        assert_eq!(3, solve_1("((("));
+        assert_eq!(3, solve_1("(()(()("));
+        assert_eq!(3, solve_1("))((((("));
+        assert_eq!(-1, solve_1("())"));
+        assert_eq!(-1, solve_1("))("));
+        assert_eq!(-3, solve_1(")))"));
+        assert_eq!(-3, solve_1(")())())"));
     }
 
     #[test]
     fn day_01_part_01_solution() {
-        let input = include_str!("../../inputs/day_01.txt")
-            .lines()
-            .collect_vec();
+        let input = include_str!("../../inputs/day_01.txt").trim();
 
-        assert_eq!(0, solve_1(&input));
+        assert_eq!(74, solve_1(input));
     }
 }
