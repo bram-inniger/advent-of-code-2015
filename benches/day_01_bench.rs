@@ -13,10 +13,10 @@ fn day01(c: &mut Criterion) {
     group.bench_function("part1", |b| {
         b.iter(|| day_01::solve_1(input));
     });
-    //
-    // group.bench_function("part2", |b| {
-    //     b.iter(|| day_01::solve_2(input));
-    // });
+
+    group.bench_function("part2", |b| {
+        b.iter(|| day_01::solve_2(input));
+    });
 }
 
 criterion_group!(benches, day01);
