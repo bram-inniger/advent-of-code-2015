@@ -1,4 +1,3 @@
-use itertools::Itertools;
 use std::str::FromStr;
 
 use lazy_static::lazy_static;
@@ -6,11 +5,26 @@ use regex::Regex;
 use rustc_hash::FxHashMap;
 
 pub fn solve_1(circuit: &[&str]) -> u16 {
-    let smth = circuit.iter().map(|c| Component::new(c)).collect_vec();
+    solve(circuit, false)
+}
 
-    let circuit: FxHashMap<&str, Component> =
-        smth.into_iter().map(|c| (c.destination(), c)).collect();
+pub fn solve_2(circuit: &[&str]) -> u16 {
+    solve(circuit, true)
+}
+
+pub fn solve(circuit: &[&str], override_b: bool) -> u16 {
+    let circuit = circuit
+        .iter()
+        .map(|c| Component::new(c))
+        .map(|c| (c.destination(), c))
+        .collect();
     let mut cache: FxHashMap<&str, u16> = FxHashMap::default();
+
+    if override_b {
+        let a = signal(&circuit, &mut cache, "a");
+        cache.clear();
+        cache.insert("b", a);
+    }
 
     signal(&circuit, &mut cache, "a")
 }
@@ -212,5 +226,19 @@ mod tests {
             .collect_vec();
 
         assert_eq!(46_065, solve_1(&input));
+    }
+
+    #[test]
+    fn day_07_part_02_sample() {
+        // No sample inputs for part 2
+    }
+
+    #[test]
+    fn day_07_part_02_solution() {
+        let input = include_str!("../../inputs/day_07.txt")
+            .lines()
+            .collect_vec();
+
+        assert_eq!(14_134, solve_2(&input));
     }
 }
