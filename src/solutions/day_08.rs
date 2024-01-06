@@ -16,6 +16,13 @@ pub fn solve_1(strings: &[&str]) -> usize {
     code_characters - memory_characters
 }
 
+pub fn solve_2(strings: &[&str]) -> usize {
+    strings
+        .iter()
+        .map(|s| s.matches('\\').count() + s.matches('\"').count() + 2)
+        .sum()
+}
+
 #[cfg(test)]
 mod tests {
     use itertools::Itertools;
@@ -36,5 +43,21 @@ mod tests {
             .collect_vec();
 
         assert_eq!(1_333, solve_1(&input));
+    }
+
+    #[test]
+    fn day_08_part_02_sample() {
+        let sample = vec!["\"\"", "\"abc\"", "\"aaa\\\"aaa\"", "\"\\x27\""];
+
+        assert_eq!(19, solve_2(&sample));
+    }
+
+    #[test]
+    fn day_08_part_02_solution() {
+        let input = include_str!("../../inputs/day_08.txt")
+            .lines()
+            .collect_vec();
+
+        assert_eq!(2_046, solve_2(&input));
     }
 }
