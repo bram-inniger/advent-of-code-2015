@@ -29,6 +29,29 @@ pub fn solve_1(instructions: &[&str]) -> usize {
         .sum()
 }
 
+pub fn solve_2(instructions: &[&str]) -> i32 {
+    let mut grid = vec![vec![0i32; 1000]; 1000];
+    let instructions = instructions
+        .iter()
+        .map(|i| Instruction::new(i))
+        .collect_vec();
+
+    #[allow(clippy::needless_range_loop)]
+    for i in instructions {
+        for x in i.x_min..=i.x_max {
+            for y in i.y_min..=i.y_max {
+                match i.action {
+                    Action::TurnOn => grid[y][x] += 1,
+                    Action::TurnOff => grid[y][x] = i32::max(grid[y][x] - 1, 0),
+                    Action::Toggle => grid[y][x] += 2,
+                }
+            }
+        }
+    }
+
+    grid.iter().map(|lights| lights.iter().sum::<i32>()).sum()
+}
+
 lazy_static! {
     static ref RE: Regex =
         Regex::new(
@@ -101,5 +124,21 @@ mod tests {
             .collect_vec();
 
         assert_eq!(377_891, solve_1(&input));
+    }
+
+    #[test]
+    fn day_06_part_02_sample() {
+        let sample = vec!["turn on 0,0 through 0,0", "toggle 0,0 through 999,999"];
+
+        assert_eq!(2_000_001, solve_2(&sample));
+    }
+
+    #[test]
+    fn day_06_part_02_solution() {
+        let input = include_str!("../../inputs/day_06.txt")
+            .lines()
+            .collect_vec();
+
+        assert_eq!(14_110_788, solve_2(&input));
     }
 }
