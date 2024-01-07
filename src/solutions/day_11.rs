@@ -2,7 +2,7 @@ use std::ops::Not;
 
 use itertools::Itertools;
 
-pub fn solve_1(password: &str) -> String {
+pub fn solve(password: &str) -> String {
     let mut password = Password::new(password);
     password.increment();
 
@@ -70,14 +70,26 @@ mod tests {
 
     #[test]
     fn day_11_part_01_sample() {
-        assert_eq!("abcdffaa", solve_1("abcdefgh"));
-        assert_eq!("ghjaabcc", solve_1("ghijklmn"));
+        assert_eq!("abcdffaa", solve("abcdefgh"));
+        assert_eq!("ghjaabcc", solve("ghijklmn"));
     }
 
     #[test]
     fn day_11_part_01_solution() {
         let input = include_str!("../../inputs/day_11.txt").trim();
 
-        assert_eq!("vzbxxyzz", solve_1(input));
+        assert_eq!("vzbxxyzz", solve(input));
+    }
+
+    #[test]
+    fn day_11_part_02_sample() {
+        // No sample inputs for part 2
+    }
+
+    #[test]
+    fn day_11_part_02_solution() {
+        let input = include_str!("../../inputs/day_11.txt").trim();
+
+        assert_eq!("vzcaabcc", solve(&solve(input)));
     }
 }
