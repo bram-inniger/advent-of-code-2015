@@ -75,8 +75,8 @@ impl<'a> Seating<'a> {
         let mut relations = self.relations.clone();
 
         people.iter().for_each(|p| {
-            relations.insert((p,"me"), 0);
-            relations.insert(("me",p), 0);
+            relations.insert((p, "me"), 0);
+            relations.insert(("me", p), 0);
         });
         people.insert("me");
 
