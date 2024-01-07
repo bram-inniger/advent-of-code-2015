@@ -4,7 +4,11 @@ use std::str::FromStr;
 use regex::Regex;
 
 pub fn solve_1(ingredients: &[&str]) -> i64 {
-    Recipe::new(ingredients).perfect()
+    Recipe::new(ingredients).perfect(false)
+}
+
+pub fn solve_2(ingredients: &[&str]) -> i64 {
+    Recipe::new(ingredients).perfect(true)
 }
 
 #[derive(Debug)]
@@ -29,7 +33,7 @@ impl Recipe {
                 durability: -999,
                 flavor: -999,
                 texture: -999,
-                _calories: -999,
+                calories: -999,
             };
             ingredients.push(bad);
             ingredients.push(bad);
@@ -38,14 +42,14 @@ impl Recipe {
         Self { ingredients }
     }
 
-    fn perfect(&self) -> i64 {
+    fn perfect(&self, calories: bool) -> i64 {
         let mut perfect = 0;
 
         for a in 0..=100 {
             for b in 0..=100 - a {
                 for c in 0..=100 - a - b {
                     let d = 100 - a - b - c;
-                    perfect = perfect.max(Self::score(self, &vec![a, b, c, d]));
+                    perfect = perfect.max(Self::score(self, &vec![a, b, c, d], calories));
                 }
             }
         }
@@ -53,7 +57,7 @@ impl Recipe {
         perfect
     }
 
-    fn score(&self, proportions: &Vec<i64>) -> i64 {
+    fn score(&self, proportions: &Vec<i64>, calories: bool) -> i64 {
         let total_capacity = (0..proportions.len())
             .map(|idx| self.ingredients[idx].capacity * proportions[idx])
             .sum::<i64>()
@@ -70,8 +74,16 @@ impl Recipe {
             .map(|idx| self.ingredients[idx].texture * proportions[idx])
             .sum::<i64>()
             .max(0);
+        let total_calories = (0..proportions.len())
+            .map(|idx| self.ingredients[idx].calories * proportions[idx])
+            .sum::<i64>()
+            .max(0);
 
-        total_capacity * total_durability * total_flavor * total_texture
+        if calories && total_calories != 500 {
+            0
+        } else {
+            total_capacity * total_durability * total_flavor * total_texture
+        }
     }
 }
 
@@ -81,7 +93,7 @@ struct Ingredient {
     durability: i64,
     flavor: i64,
     texture: i64,
-    _calories: i64,
+    calories: i64,
 }
 
 impl Ingredient {
@@ -92,14 +104,14 @@ impl Ingredient {
         let durability = i64::from_str(caps.name("durability").unwrap().as_str()).unwrap();
         let flavor = i64::from_str(caps.name("flavor").unwrap().as_str()).unwrap();
         let texture = i64::from_str(caps.name("texture").unwrap().as_str()).unwrap();
-        let _calories = i64::from_str(caps.name("calories").unwrap().as_str()).unwrap();
+        let calories = i64::from_str(caps.name("calories").unwrap().as_str()).unwrap();
 
         Self {
             capacity,
             durability,
             flavor,
             texture,
-            _calories,
+            calories,
         }
     }
 }
@@ -127,5 +139,24 @@ mod tests {
             .collect_vec();
 
         assert_eq!(13_882_464, solve_1(&input));
+    }
+
+    #[test]
+    fn day_15_part_02_sample() {
+        let sample = vec![
+            "Butterscotch: capacity -1, durability -2, flavor 6, texture 3, calories 8",
+            "Cinnamon: capacity 2, durability 3, flavor -2, texture -1, calories 3",
+        ];
+
+        assert_eq!(57_600_000, solve_2(&sample));
+    }
+
+    #[test]
+    fn day_15_part_02_solution() {
+        let input = include_str!("../../inputs/day_15.txt")
+            .lines()
+            .collect_vec();
+
+        assert_eq!(11_171_160, solve_2(&input));
     }
 }
