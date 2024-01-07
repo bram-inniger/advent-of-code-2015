@@ -13,10 +13,22 @@ const NEIGHBOURS: [Coordinate; 8] = [
 ];
 
 pub fn solve_1(lights: &[&str], steps: u8) -> usize {
+    solve(lights, steps, false)
+}
+
+pub fn solve_2(lights: &[&str], steps: u8) -> usize {
+    solve(lights, steps, true)
+}
+
+fn solve(lights: &[&str], steps: u8, stuck: bool) -> usize {
     let mut lights = Lights::new(lights);
 
+    if stuck {
+        lights.light_corners()
+    }
+
     for _ in 0..steps {
-        lights = lights.step();
+        lights = lights.step(stuck);
     }
 
     lights
@@ -60,7 +72,7 @@ impl Lights {
         Self { grid, x_max, y_max }
     }
 
-    fn step(&self) -> Self {
+    fn step(&self, stuck: bool) -> Self {
         let grid: FxHashMap<Coordinate, State> = self
             .grid
             .iter()
@@ -87,11 +99,17 @@ impl Lights {
             })
             .collect();
 
-        Self {
+        let mut lights = Self {
             grid,
             x_max: self.x_max,
             y_max: self.y_max,
+        };
+
+        if stuck {
+            lights.light_corners()
         }
+
+        lights
     }
 
     fn lit_neighbours(&self, c: Coordinate) -> usize {
@@ -105,6 +123,28 @@ impl Lights {
                 matches!(self.grid.get(&neighbour), Some(State::On))
             })
             .count()
+    }
+
+    fn light_corners(&mut self) {
+        [
+            Coordinate { x: 0, y: 0 },
+            Coordinate {
+                x: self.x_max - 1,
+                y: 0,
+            },
+            Coordinate {
+                x: 0,
+                y: self.y_max - 1,
+            },
+            Coordinate {
+                x: self.x_max - 1,
+                y: self.y_max - 1,
+            },
+        ]
+        .into_iter()
+        .for_each(|c| {
+            self.grid.insert(c, State::On);
+        });
     }
 }
 
@@ -140,5 +180,21 @@ mod tests {
             .collect_vec();
 
         assert_eq!(814, solve_1(&input, 100));
+    }
+
+    #[test]
+    fn day_18_part_02_sample() {
+        let sample = vec!["##.#.#", "...##.", "#....#", "..#...", "#.#..#", "####.#"];
+
+        assert_eq!(17, solve_2(&sample, 5));
+    }
+
+    #[test]
+    fn day_18_part_02_solution() {
+        let input = include_str!("../../inputs/day_18.txt")
+            .lines()
+            .collect_vec();
+
+        assert_eq!(924, solve_2(&input, 100));
     }
 }
