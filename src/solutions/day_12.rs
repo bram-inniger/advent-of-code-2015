@@ -1,14 +1,51 @@
 use std::str::FromStr;
 
-use regex::Regex;
+use serde_json::Value;
 
-pub fn solve_1(json: &str) -> i32 {
-    Regex::new(r"(-?\d+)")
-        .unwrap()
-        .find_iter(json)
-        .map(|m| m.as_str())
-        .map(|n| i32::from_str(n).unwrap())
-        .sum()
+pub fn solve_1(json: &str) -> i64 {
+    fn sum(json: &Value) -> i64 {
+        match json {
+            Value::Null => 0,
+            Value::Bool(_) => 0,
+            Value::Number(number) => number.as_i64().unwrap(),
+            Value::String(_) => 0,
+            Value::Array(values) => values.iter().map(sum).sum(),
+            Value::Object(map) => map.values().map(sum).sum(),
+        }
+    }
+
+    let json = Value::from_str(json).unwrap();
+    sum(&json)
+}
+
+pub fn solve_2(json: &str) -> i64 {
+    fn sum(json: &Value) -> i64 {
+        match json {
+            Value::Null => 0,
+            Value::Bool(_) => 0,
+            Value::Number(number) => number.as_i64().unwrap(),
+            Value::String(_) => 0,
+            Value::Array(values) => values.iter().map(sum).sum(),
+            Value::Object(map) => {
+                let red = map
+                    .values()
+                    .flat_map(|v| match v {
+                        Value::String(string) => Some(string),
+                        _ => None,
+                    })
+                    .any(|s| s == "red");
+
+                if red {
+                    0
+                } else {
+                    map.values().map(sum).sum()
+                }
+            }
+        }
+    }
+
+    let json = Value::from_str(json).unwrap();
+    sum(&json)
 }
 
 #[cfg(test)]
@@ -32,5 +69,20 @@ mod tests {
         let input = include_str!("../../inputs/day_12.txt").trim();
 
         assert_eq!(119_433, solve_1(input));
+    }
+
+    #[test]
+    fn day_12_part_02_sample() {
+        assert_eq!(6, solve_2(r#"[1,2,3]"#));
+        assert_eq!(4, solve_2(r#"[1,{"c":"red","b":2},3]"#));
+        assert_eq!(0, solve_2(r#"{"d":"red","e":[1,2,3,4],"f":5}"#));
+        assert_eq!(6, solve_2(r#"[1,"red",5]"#));
+    }
+
+    #[test]
+    fn day_12_part_02_solution() {
+        let input = include_str!("../../inputs/day_12.txt").trim();
+
+        assert_eq!(68_466, solve_2(input));
     }
 }

@@ -18,6 +18,7 @@ dependencies = [
  "rayon",
  "regex",
  "rustc-hash",
+ "serde_json",
 ]
 
 [[package]]
