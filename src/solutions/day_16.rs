@@ -7,8 +7,27 @@ use regex::Regex;
 use rustc_hash::FxHashMap;
 
 pub fn solve_1(sues: &[&str]) -> u16 {
-    let sues = sues.iter().map(|s| Sue::new(s)).collect_vec();
-    let tape: FxHashMap<&str, u16> = [
+    let tape = read_tape();
+
+    sues.iter()
+        .map(|s| Sue::new(s))
+        .find(|s| s.valid_exact(&tape))
+        .unwrap()
+        .number
+}
+
+pub fn solve_2(sues: &[&str]) -> u16 {
+    let tape = read_tape();
+
+    sues.iter()
+        .map(|s| Sue::new(s))
+        .find(|s| s.valid_ranges(&tape))
+        .unwrap()
+        .number
+}
+
+fn read_tape<'a>() -> FxHashMap<&'a str, u16> {
+    [
         ("children", 3),
         ("cats", 7),
         ("samoyeds", 2),
@@ -21,15 +40,7 @@ pub fn solve_1(sues: &[&str]) -> u16 {
         ("perfumes", 1),
     ]
     .into_iter()
-    .collect();
-
-    sues.iter()
-        .find(|&s| {
-            tape.iter()
-                .all(|(&p, &v)| s.properties.contains_key(p).not() || s.properties[p] == v)
-        })
-        .unwrap()
-        .number
+    .collect()
 }
 
 lazy_static! {
@@ -60,6 +71,23 @@ impl<'a> Sue<'a> {
 
         Self { number, properties }
     }
+
+    fn valid_exact(&self, tape: &FxHashMap<&str, u16>) -> bool {
+        tape.iter()
+            .all(|(&p, &v)| self.properties.contains_key(p).not() || self.properties[p] == v)
+    }
+
+    fn valid_ranges(&self, tape: &FxHashMap<&str, u16>) -> bool {
+        tape.iter().all(|(&p, &v)| {
+            self.properties.contains_key(p).not() || {
+                match p {
+                    "cats" | "trees" => self.properties[p] > v,
+                    "pomeranians" | "goldfish" => self.properties[p] < v,
+                    _ => self.properties[p] == v,
+                }
+            }
+        })
+    }
 }
 
 #[cfg(test)]
@@ -80,5 +108,19 @@ mod tests {
             .collect_vec();
 
         assert_eq!(40, solve_1(&input));
+    }
+
+    #[test]
+    fn day_16_part_02_sample() {
+        // No sample inputs for part 1
+    }
+
+    #[test]
+    fn day_16_part_02_solution() {
+        let input = include_str!("../../inputs/day_16.txt")
+            .lines()
+            .collect_vec();
+
+        assert_eq!(241, solve_2(&input));
     }
 }
