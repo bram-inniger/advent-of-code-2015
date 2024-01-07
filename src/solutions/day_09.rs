@@ -5,6 +5,14 @@ use regex::Regex;
 use rustc_hash::{FxHashMap, FxHashSet};
 
 pub fn solve_1(distances: &[&str]) -> u16 {
+    solve(distances).into_iter().min().unwrap()
+}
+
+pub fn solve_2(distances: &[&str]) -> u16 {
+    solve(distances).into_iter().max().unwrap()
+}
+
+fn solve(distances: &[&str]) -> Vec<u16> {
     let graph = Graph::new(distances);
 
     graph
@@ -16,8 +24,7 @@ pub fn solve_1(distances: &[&str]) -> u16 {
                 .map(|idx| graph.vertices[&(*p[idx - 1], *p[idx])])
                 .sum()
         })
-        .min()
-        .unwrap()
+        .collect()
 }
 
 #[derive(Debug)]
@@ -72,5 +79,25 @@ mod tests {
             .collect_vec();
 
         assert_eq!(251, solve_1(&input));
+    }
+
+    #[test]
+    fn day_09_part_02_sample() {
+        let sample = vec![
+            "London to Dublin = 464",
+            "London to Belfast = 518",
+            "Dublin to Belfast = 141",
+        ];
+
+        assert_eq!(982, solve_2(&sample));
+    }
+
+    #[test]
+    fn day_09_part_02_solution() {
+        let input = include_str!("../../inputs/day_09.txt")
+            .lines()
+            .collect_vec();
+
+        assert_eq!(898, solve_2(&input));
     }
 }
