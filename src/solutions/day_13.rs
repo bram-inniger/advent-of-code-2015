@@ -5,8 +5,14 @@ use regex::Regex;
 use rustc_hash::{FxHashMap, FxHashSet};
 
 pub fn solve_1(relations: &[&str]) -> i16 {
-    let seating = Seating::new(relations);
+    optimal_happiness(Seating::new(relations))
+}
 
+pub fn solve_2(relations: &[&str]) -> i16 {
+    optimal_happiness(Seating::new(relations).add_me())
+}
+
+fn optimal_happiness(seating: Seating) -> i16 {
     seating
         .people
         .iter()
@@ -63,6 +69,19 @@ impl<'a> Seating<'a> {
 
         Self { people, relations }
     }
+
+    fn add_me(&self) -> Self {
+        let mut people = self.people.clone();
+        let mut relations = self.relations.clone();
+
+        people.iter().for_each(|p| {
+            relations.insert((p,"me"), 0);
+            relations.insert(("me",p), 0);
+        });
+        people.insert("me");
+
+        Self { people, relations }
+    }
 }
 
 #[cfg(test)]
@@ -98,5 +117,19 @@ mod tests {
             .collect_vec();
 
         assert_eq!(664, solve_1(&input));
+    }
+
+    #[test]
+    fn day_13_part_02_sample() {
+        // No sample inputs for part 2
+    }
+
+    #[test]
+    fn day_13_part_02_solution() {
+        let input = include_str!("../../inputs/day_13.txt")
+            .lines()
+            .collect_vec();
+
+        assert_eq!(640, solve_2(&input));
     }
 }
