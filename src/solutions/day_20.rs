@@ -20,6 +20,26 @@ pub fn solve_1(nr_presents: &str) -> usize {
         .unwrap()
 }
 
+pub fn solve_2(nr_presents: &str) -> usize {
+    let nr_presents = usize::from_str(nr_presents).unwrap();
+    let nr_houses = 1_000_000;
+
+    let mut houses: Vec<usize> = vec![0; nr_houses];
+
+    for house in 1..nr_houses {
+        for idx in (house..nr_houses.min(51*house)).step_by(house) {
+            houses[idx] += house * 11;
+        }
+    }
+
+    houses
+        .iter()
+        .enumerate()
+        .find(|(_, &nr_p)| nr_p >= nr_presents)
+        .map(|(house, _)| house)
+        .unwrap()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -35,5 +55,17 @@ mod tests {
         let input = include_str!("../../inputs/day_20.txt").trim();
 
         assert_eq!(776_160, solve_1(input));
+    }
+
+    #[test]
+    fn day_20_part_02_sample() {
+        // No sample inputs for part 2
+    }
+
+    #[test]
+    fn day_20_part_02_solution() {
+        let input = include_str!("../../inputs/day_20.txt").trim();
+
+        assert_eq!(786_240, solve_2(input));
     }
 }
