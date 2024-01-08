@@ -27,7 +27,7 @@ pub fn solve_2(nr_presents: &str) -> usize {
     let mut houses: Vec<usize> = vec![0; nr_houses];
 
     for house in 1..nr_houses {
-        for idx in (house..nr_houses.min(51*house)).step_by(house) {
+        for idx in (house..nr_houses.min(51 * house)).step_by(house) {
             houses[idx] += house * 11;
         }
     }
