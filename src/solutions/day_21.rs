@@ -15,6 +15,18 @@ pub fn solve_1(boss: &[&str]) -> i16 {
         .unwrap()
 }
 
+pub fn solve_2(boss: &[&str]) -> i16 {
+    let boss = Boss::new(boss);
+    let shop = Shop::new();
+
+    shop.inventories()
+        .iter()
+        .filter(|inv| boss.loses(inv))
+        .map(|inv| inv.iter().map(|i| i.cost).sum::<i16>())
+        .max()
+        .unwrap()
+}
+
 #[derive(Debug)]
 struct Boss {
     hit_points: i16,
@@ -36,13 +48,24 @@ impl Boss {
     }
 
     fn wins(&self, inventory: &[&Item]) -> bool {
+        let (win_turns, lose_turns) = self.battle_turns(inventory);
+
+        win_turns <= lose_turns
+    }
+
+    fn loses(&self, inventory: &[&Item]) -> bool {
+        let (win_turns, lose_turns) = self.battle_turns(inventory);
+
+        win_turns > lose_turns
+    }
+
+    fn battle_turns(&self, inventory: &[&Item]) -> (i16, i16) {
         let player_damage = 1.max(inventory.iter().map(|i| i.damage).sum::<i16>() - self.armor);
         let boss_damage = 1.max(self.damage - inventory.iter().map(|i| i.armor).sum::<i16>());
 
         let win_turns = (self.hit_points + player_damage - 1) / player_damage;
         let lose_turns = (PLAYER_HP + boss_damage - 1) / boss_damage;
-
-        win_turns <= lose_turns
+        (win_turns, lose_turns)
     }
 }
 
@@ -149,5 +172,19 @@ mod tests {
             .collect_vec();
 
         assert_eq!(78, solve_1(&input));
+    }
+
+    #[test]
+    fn day_21_part_02_sample() {
+        // No sample inputs for part 2
+    }
+
+    #[test]
+    fn day_21_part_02_solution() {
+        let input = include_str!("../../inputs/day_21.txt")
+            .lines()
+            .collect_vec();
+
+        assert_eq!(148, solve_2(&input));
     }
 }
