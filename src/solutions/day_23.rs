@@ -3,7 +3,15 @@ use std::str::FromStr;
 use rustc_hash::FxHashMap;
 
 pub fn solve_1(instructions: &[&str]) -> u32 {
-    let mut computer = Computer::new(instructions);
+    solve(instructions, 0)
+}
+
+pub fn solve_2(instructions: &[&str]) -> u32 {
+    solve(instructions, 1)
+}
+
+fn solve(instructions: &[&str], register_a: u32) -> u32 {
+    let mut computer = Computer::new(instructions, register_a);
     computer.run();
     computer.registers[&Register::B]
 }
@@ -16,12 +24,11 @@ struct Computer {
 }
 
 impl Computer {
-    fn new(instructions: &[&str]) -> Self {
+    fn new(instructions: &[&str], register_a: u32) -> Self {
         Self {
             instructions: instructions.iter().map(|&i| Instruction::new(i)).collect(),
-            registers: [Register::A, Register::B]
+            registers: [(Register::A, register_a), (Register::B, 0)]
                 .into_iter()
-                .map(|r| (r, 0))
                 .collect(),
             ip: 0,
         }
@@ -145,5 +152,19 @@ mod tests {
             .collect_vec();
 
         assert_eq!(255, solve_1(&input));
+    }
+
+    #[test]
+    fn day_23_part_02_sample() {
+        // No sample inputs for part 2
+    }
+
+    #[test]
+    fn day_23_part_02_solution() {
+        let input = include_str!("../../inputs/day_23.txt")
+            .lines()
+            .collect_vec();
+
+        assert_eq!(334, solve_2(&input));
     }
 }
