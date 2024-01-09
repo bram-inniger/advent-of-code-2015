@@ -7,6 +7,12 @@ pub fn solve_1(message: &str) -> u64 {
     calculate_nth(index_of(&code))
 }
 
+pub fn solve_2() {
+    // You fill the weather machine with fifty stars. It comes to life!
+    //
+    // Snow begins to fall.
+}
+
 fn index_of(code: &Code) -> u64 {
     // Derived on paper
     (code.row - 1) * (code.row) / 2
@@ -60,5 +66,15 @@ mod tests {
         let input = include_str!("../../inputs/day_25.txt").trim();
 
         assert_eq!(2_650_453, solve_1(input));
+    }
+
+    #[test]
+    fn day_25_part_02_sample() {
+        solve_2();
+    }
+
+    #[test]
+    fn day_25_part_02_solution() {
+        solve_2();
     }
 }
