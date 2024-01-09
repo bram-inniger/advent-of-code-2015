@@ -5,6 +5,14 @@ use std::str::FromStr;
 use rustc_hash::FxHashMap;
 
 pub fn solve_1(boss: &[&str]) -> i32 {
+    solve(boss, false)
+}
+
+pub fn solve_2(boss: &[&str]) -> i32 {
+    solve(boss, true)
+}
+
+fn solve(boss: &[&str], hard_mode: bool) -> i32 {
     let boss = Boss::new(boss);
     let book = Book::new();
     let game = Game::new(boss, &book);
@@ -15,15 +23,17 @@ pub fn solve_1(boss: &[&str]) -> i32 {
     let mut min_mana = i32::MAX;
 
     while let Some(game) = to_play.pop_front() {
-        game.play().into_iter().for_each(|g| match g.state() {
-            GameState::OnGoing => {
-                if g.spent_mana < min_mana {
-                    to_play.push_back(g)
+        game.play(hard_mode)
+            .into_iter()
+            .for_each(|g| match g.state() {
+                GameState::OnGoing => {
+                    if g.spent_mana < min_mana {
+                        to_play.push_back(g)
+                    }
                 }
-            }
-            GameState::Won => min_mana = min_mana.min(g.spent_mana),
-            GameState::Lost => {}
-        });
+                GameState::Won => min_mana = min_mana.min(g.spent_mana),
+                GameState::Lost => {}
+            });
     }
 
     min_mana
@@ -70,12 +80,21 @@ impl<'a> Game<'a> {
         }
     }
 
-    fn play(&self) -> Vec<Self> {
+    fn play(&self, hard_mode: bool) -> Vec<Self> {
         let mut player_mana = self.mana;
         let mut player_armor = 0;
+        let mut player_hp = self.player_hp;
         let mut boss_hp = self.boss_hp;
 
-        // First deal with active effects
+        // First check if hard mode is enables and whether this makes us lose
+        if hard_mode && matches!(self.actor, Actor::Player) {
+            player_hp -= 1;
+            if player_hp <= 0 {
+                return vec![];
+            }
+        }
+
+        // Then deal with active effects
         self.effects.iter().for_each(|(&s, _)| match s {
             Spell::Shield { armor, .. } => player_armor = *armor,
             Spell::Poison { damage, .. } => boss_hp -= damage,
@@ -111,7 +130,7 @@ impl<'a> Game<'a> {
                         actor: Actor::Boss,
                         mana: player_mana - cost,
                         spent_mana: self.spent_mana + cost,
-                        player_hp: self.player_hp,
+                        player_hp,
                         boss_hp: boss_hp - damage,
                         boss_damage: self.boss_damage,
                         book: self.book,
@@ -121,7 +140,7 @@ impl<'a> Game<'a> {
                         actor: Actor::Boss,
                         mana: player_mana - cost,
                         spent_mana: self.spent_mana + cost,
-                        player_hp: self.player_hp + heal,
+                        player_hp: player_hp + heal,
                         boss_hp: boss_hp - damage,
                         boss_damage: self.boss_damage,
                         book: self.book,
@@ -135,7 +154,7 @@ impl<'a> Game<'a> {
                             actor: Actor::Boss,
                             mana: player_mana - s.cost(),
                             spent_mana: self.spent_mana + s.cost(),
-                            player_hp: self.player_hp,
+                            player_hp,
                             boss_hp,
                             boss_damage: self.boss_damage,
                             book: self.book,
@@ -146,7 +165,7 @@ impl<'a> Game<'a> {
                 .collect(),
             // Play the turn as the boss, dealing damage
             Actor::Boss => {
-                let player_hp = self.player_hp - 1.max(self.boss_damage - player_armor);
+                let player_hp = player_hp - 1.max(self.boss_damage - player_armor);
 
                 vec![Self {
                     actor: Actor::Player,
@@ -271,5 +290,19 @@ mod tests {
             .collect_vec();
 
         assert_eq!(953, solve_1(&input));
+    }
+
+    #[test]
+    fn day_22_part_02_sample() {
+        // No sample inputs for part 2
+    }
+
+    #[test]
+    fn day_22_part_02_solution() {
+        let input = include_str!("../../inputs/day_22.txt")
+            .lines()
+            .collect_vec();
+
+        assert_eq!(1_289, solve_2(&input));
     }
 }
